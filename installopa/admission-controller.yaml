@@ -39,6 +39,38 @@ subjects:
   name: system:serviceaccounts:opa
   apiGroup: rbac.authorization.k8s.io
 ---
+kind: SecurityContextConstraints
+apiVersion: security.openshift.io/v1
+metadata:
+  name: opa-scc
+  namespace: opa
+allowHostDirVolumePlugin: true
+allowHostIPC: true
+allowHostNetwork: true
+allowHostPID: true
+allowHostPorts: true
+allowPrivilegeEscalation: true
+allowPrivilegedContainer: true
+allowedCapabilities:
+- '*'
+allowedUnsafeSysctls:
+- '*'
+defaultAddCapabilities: []
+requiredDropCapabilities: []
+readOnlyRootFilesystem: false
+# allowedProcMountTypes: runtime/default
+priority: 1
+runAsUser:
+  type: RunAsAny
+seLinuxContext:
+  type: RunAsAny
+seccompProfiles:
+- '*'
+users:
+- system:serviceaccount:opa:default
+volumes:
+- '*'
+---
 kind: Service
 apiVersion: v1
 metadata:
@@ -124,19 +156,14 @@ metadata:
 data:
   main: |
     package system
-
     import data.kubernetes.admission
-
     main = {
       "apiVersion": "admission.k8s.io/v1beta1",
       "kind": "AdmissionReview",
       "response": response,
     }
-
     default uid = ""
-
     uid = input.request.uid
-
     response = {
         "allowed": false,
         "uid": uid,
@@ -148,35 +175,3 @@ data:
         reason != ""
     }
     else = {"allowed": true, "uid": uid}
----
-kind: SecurityContextConstraints
-apiVersion: security.openshift.io/v1
-metadata:
-  name: opa-scc
-  namespace: opa
-allowHostDirVolumePlugin: true
-allowHostIPC: true
-allowHostNetwork: true
-allowHostPID: true
-allowHostPorts: true
-allowPrivilegeEscalation: true
-allowPrivilegedContainer: true
-allowedCapabilities:
-- '*'
-allowedUnsafeSysctls:
-- '*'
-defaultAddCapabilities: []
-requiredDropCapabilities: []
-readOnlyRootFilesystem: false
-# allowedProcMountTypes: runtime/default
-priority: 1
-runAsUser:
-  type: RunAsAny
-seLinuxContext:
-  type: RunAsAny
-seccompProfiles:
-- '*'
-users:
-- system:serviceaccount:opa:default
-volumes:
-- '*'
