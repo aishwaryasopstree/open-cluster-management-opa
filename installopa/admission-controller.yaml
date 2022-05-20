@@ -52,7 +52,7 @@ allowHostPorts: true
 allowPrivilegeEscalation: true
 allowPrivilegedContainer: true
 allowedCapabilities:
-- '*'
+- NET_BIND_SERVICE
 allowedUnsafeSysctls:
 - '*'
 defaultAddCapabilities: []
